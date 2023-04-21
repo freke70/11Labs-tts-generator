@@ -8,7 +8,7 @@ import os
 import uuid
 import time
 
-eleven = ElevenLabs("3cfeef6620d20b60a41d776d7411f968")
+eleven = 
 voice = eleven.voices["Adam"]
 
 def generate_audio():
