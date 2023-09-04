@@ -1,43 +1,31 @@
 import io
 import tkinter as tk
 from tkinter import filedialog
-from elevenlabs import ElevenLabs
 from pydub import AudioSegment
 import tempfile
 import os
 import uuid
 import time
+from elevenlabs import generate, play, set_api_key
 
-eleven = 
-voice = eleven.voices["Adam"]
+# Setting the API key
+set_api_key("ENTERAPI")
 
 def generate_audio():
     input_text = text_box.get(1.0, tk.END)
     paragraphs = input_text.split('\n\n')
     output_audio = AudioSegment.empty()
 
-    temp_files = []
-
     for index, paragraph in enumerate(paragraphs):
         if len(paragraph.strip()) > 0:
             print(f"Generating audio for paragraph {index + 1} of {len(paragraphs)}...")
             countdown.set(f"Paragraphs remaining: {len(paragraphs) - index - 1}")
-            audio = voice.generate(paragraph)
-            temp_file_name = str(uuid.uuid4())
-            print(f"Saving audio to temporary file: {temp_file_name}.mp3")
-            audio.save(temp_file_name)
-            time.sleep(1)  # Add a small delay to ensure the file is saved
-            print("Loading audio from temporary file...")
-            audio_segment = AudioSegment.from_file(temp_file_name + '.mp3', format='mp3')
+            audio_bytes = generate(text=paragraph, voice="Bella", model="eleven_monolingual_v1")
+            audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes), format='mp3')
             output_audio += audio_segment
-            temp_files.append(temp_file_name + '.mp3')
 
     save_path = filedialog.asksaveasfilename(defaultextension='.mp3')
     output_audio.export(save_path, format='mp3')
-
-    # Clean up the temporary files created
-    for temp_file in temp_files:
-        os.remove(temp_file)
 
 def update_char_count(*args):
     char_count.set(f"Character count: {len(text_box.get(1.0, tk.END)) - 1}")
@@ -77,7 +65,6 @@ char_count_label.pack(pady=5)
 update_char_count()
 
 countdown = tk.StringVar()
-countdown_label = tk.Label(root, textvariable=countdown, bg=retro_bg, fg=retro_fg, font=retro_font)
 countdown_label = tk.Label(root, textvariable=countdown, bg=retro_bg, fg=retro_fg, font=retro_font)
 countdown_label.pack(pady=5)
 
